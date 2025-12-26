@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Branch Auto Claims Vehicle Control Program (VCP)</title>
+<style>
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+  color: #2d3748;
+  line-height: 1.7;
+  font-size: 16px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Navigation - Fixed and Improved */
+nav {
+  background: linear-gradient(135deg, #497257 0%, #3d5f47 100%);
+  padding: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 3px solid #2d4a38;
+}
+
+nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.branch-icon {
+  width: 220px;
+  height: 73px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.branch-icon img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-tab {
+  color: white;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.nav-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.nav-tab.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Quick nav indicator */
+.nav-tab.quick-ref {
+  background: #ffc107;
+  color: #333;
+  font-weight: 700;
+}
+
+.nav-tab.quick-ref:hover {
+  background: #ffca28;
+}
+
+/* Section Styling */
+.section {
+  display: none;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+  border: 1px solid rgba(73, 114, 87, 0.1);
+}
+
+.section.active {
+  display: block;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 13px;
+  color: #718096;
+  margin-bottom: 20px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.breadcrumb a {
+  color: #497257;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Headers */
+h2 {
+  color: #497257;
+  font-size: 36px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 4px solid #497257;
+  font-weight: 700;
+}
+
+h3 {
+  color: #2d4a38;
+  font-size: 26px;
+  margin: 32px 0 16px 0;
+  font-weight: 700;
+}
+
+h4 {
+  color: #497257;
+  font-size: 20px;
+  margin: 24px 0 12px 0;
+  font-weight: 600;
+}
+
+/* Quick Reference Styles */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 24px 0;
+}
+
+.quick-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border-left: 5px solid #497257;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quick-card h4 {
+  margin-top: 0;
+  color: #497257;
+  font-size: 18px;
+}
+
+.quick-card ul {
+  margin: 12px 0 0 20px;
+  line-height: 1.8;
+}
+
+.quick-card ul li {
+  margin: 8px 0;
+}
+
+/* Highlight boxes with icons */
+.alert-box {
+  padding: 16px 16px 16px 50px;
+  margin: 16px 0;
+  border-radius: 8px;
+  position: relative;
+  line-height: 1.7;
+}
+
+.alert-box::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.alert-success {
+  background: #d4edda;
+  border-left: 5px solid #28a745;
+  color: #155724;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  border-left: 5px solid #ffc107;
+  color: #856404;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  border-left: 5px solid #dc3545;
+  color: #721c24;
+}
+
+.alert-info {
+  background: #d1ecf1;
+  border-left: 5px solid #17a2b8;
+  color: #0c5460;
+}
+
+/* Collapsible sections - improved */
+.collapsible-header {
+  background: linear-gradient(135deg, #497257 0%, #3d5f47 100%);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+  margin: 12px 0;
+}
+
+.collapsible-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(73, 114, 87, 0.3);
+}
+
+.collapsible-header .arrow {
+  font-size: 20px;
+  transition: transform 0.3s;
+}
+
+.collapsible-header.active .arrow {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  display: none;
+  background: #f8f9fa;
+  border: 2px solid #497257;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 20px;
+  margin-top: -12px;
+}
+
+.collapsible-content.active {
+  display: block;
+}
+
+/* Tables - improved */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px 0;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+th {
+  background: linear-gradient(135deg, #497257 0%, #3d5f47 100%);
+  color: white;
+  padding: 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background: #f8f9fa;
+}
+
+/* Internal links - improved visibility */
+a.internal-link {
+  color: #0056b3;
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+a.internal-link:hover {
+  color: #003d82;
+}
+
+/* Printable checklists */
+.printable-checklist {
+  background: white;
+  border: 2px solid #497257;
+  padding: 24px;
+  margin: 20px 0;
+  border-radius: 8px;
+  page-break-inside: avoid;
+}
+
+.printable-checklist h4 {
+  margin-top: 0;
+  border-bottom: 2px solid #497257;
+  padding-bottom: 8px;
+}
+
+.print-button {
+  background: #497257;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 8px 0;
+  transition: background 0.3s;
+}
+
+.print-button:hover {
+  background: #3d5f47;
+}
+
+/* Visual flowchart */
+.flow-step {
+  background: white;
+  border: 3px solid #497257;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+  font-weight: 600;
+  position: relative;
+}
+
+.flow-arrow {
+  text-align: center;
+  font-size: 24px;
+  color: #497257;
+  margin: 8px 0;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .nav-tabs {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .nav-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .section {
+    padding: 20px;
+  }
+  
+  h2 {
+    font-size: 28px;
+  }
+  
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 10px 8px;
+  }
+}
+
+/* Print styles */
+@media print {
+  nav { display: none; }
+  .section { display: block !important; page-break-after: always; padding: 20px; }
+  .nav-tabs, .print-button { display: none; }
+  .printable-checklist { border: 2px solid #000; }
+  * { animation: none !important; }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+*:focus-visible {
+  outline: 3px solid #497257;
+  outline-offset: 2px;
+}
+
+/* Color-coded priority indicators */
+.priority-critical {
+  background: #dc3545;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.priority-high {
+  background: #ffc107;
+  color: #333;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.priority-normal {
+  background: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-left: 8px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="container">
+<div class="logo-container">
+<div class="branch-icon">
+<img src="https://branch.cdn.prismic.io/branch/b75d80b4-b5c9-44cb-aa6f-20a876ed5ebc_logo.min.svg" alt="Branch Insurance">
+</div>
+</div>
+<div class="nav-tabs">
+<a class="nav-tab quick-ref active" onclick="showSection('quick-ref')">⚡ Quick Reference</a>
+<a class="nav-tab" onclick="showSection('executive')">Executive Summary</a>
+<a class="nav-tab" onclick="showSection('daily-ops')">Daily Operations</a>
+<a class="nav-tab" onclick="showSection('exceptions')">Exception Handling</a>
+<a class="nav-tab" onclick="showSection('total-loss')">Total Loss</a>
+<a class="nav-tab" onclick="showSection('metrics')">Metrics</a>
+<a class="nav-tab" onclick="showSection('role-guides')">Role Guides</a>
+<a class="nav-tab" onclick="showSection('implementation')">Implementation</a>
+</div>
+</div>
+</nav>
+
+<div class="container">
+
+<!-- QUICK REFERENCE SECTION (NEW) -->
+<div id="quick-ref" class="section active">
+<div class="breadcrumb">Home > Quick Reference</div>
+
+<h2>⚡ Quick Reference - Daily Essentials</h2>
+
+<div class="alert-info">
+<strong>Purpose:</strong> This page contains everything you need for 90% of your daily work. Detailed procedures are in other tabs.
+</div>
+
+<h3>🌅 Morning Routine (First 30 Minutes)</h3>
+<div class="quick-grid">
+<div class="quick-card">
+<h4>1. Create Daily Location Tasks</h4>
+<ul>
+<li>Create "Daily Location Verification" task for EVERY open claim</li>
+<li>Complete all tasks by 10am</li>
+<li>Target: 100% completion rate</li>
+</ul>
+<a href="#" onclick="showSection('daily-ops');return false;" class="internal-link">→ See SOP 2C for details</a>
+</div>
+
+<div class="quick-card">
+<h4>2. Review New Assignments</h4>
+<ul>
+<li>Check post-FNOL claims assigned to you</li>
+<li>Verify vehicle location is documented</li>
+<li>Route vehicles within 48 hours</li>
+</ul>
+<a href="#" onclick="showSection('daily-ops');return false;" class="internal-link">→ See SOP 1 for routing</a>
+</div>
+
+<div class="quick-card">
+<h4>3. Check for Emergencies</h4>
+<ul>
+<li>🚨 Any vehicles at tow yards?</li>
+<li>⚠ Any unknown locations?</li>
+<li>⏰ Any >48 hours without movement?</li>
+</ul>
+<a href="#" onclick="showSection('exceptions');return false;" class="internal-link">→ Emergency protocols</a>
+</div>
+</div>
+
+<h3>🔗 Quick Links to Detailed Procedures</h3>
+<div class="quick-grid">
+<div class="quick-card">
+<h4>Daily Operations</h4>
+<ul style="font-size:14px">
+<li><a href="#" onclick="showSection('daily-ops');scrollToSOP('1');return false;" class="internal-link">SOP 1: Vehicle Routing</a></li>
+<li><a href="#" onclick="showSection('daily-ops');scrollToSOP('2c');return false;" class="internal-link">SOP 2C: Daily Location Tasks</a></li>
+<li><a href="#" onclick="showSection('daily-ops');scrollToSOP('3');return false;" class="internal-link">SOP 3: GYB Process</a></li>
+</ul>
+</div>
+
+<div class="quick-card">
+<h4>Exceptions</h4>
+<ul style="font-size:14px">
+<li><a href="#" onclick="showSection('exceptions');scrollToSOP('2a');return false;" class="internal-link">SOP 2A: Customer-Selected Shops</a></li>
+<li><a href="#" onclick="showSection('exceptions');scrollToSOP('2b');return false;" class="internal-link">SOP 2B: Tow Yard Emergency</a></li>
+<li><a href="#" onclick="showSection('exceptions');scrollToSOP('2d');return false;" class="internal-link">SOP 2D: Storage Mitigation</a></li>
+</ul>
+</div>
+
+<div class="quick-card">
+<h4>Total Loss</h4>
+<ul style="font-size:14px">
+<li><a href="#" onclick="showSection('total-loss');return false;" class="internal-link">SOP 4: TL Process</a></li>
+<li><a href="#" onclick="showSection('total-loss');return false;" class="internal-link">Early Task Activation</a></li>
+<li><a href="#" onclick="showSection('total-loss');return false;" class="internal-link">12-Day Settlement Target</a></li>
+</ul>
+</div>
+</div>
+
+<h3>📍 Vehicle Routing Decision (Use This Every Time)</h3>
+
+<div class="flow-step" style="background:#d4edda;border-color:#28a745">
+<strong>STEP 1:</strong> Is damage clearly repairable (minor-moderate, no airbags)?
+</div>
+<div class="flow-arrow">↓ YES → Route to GYB | ↓ NO → Continue</div>
+
+<div class="flow-step" style="background:#fff3cd;border-color:#ffc107">
+<strong>STEP 2:</strong> Is this a projected total loss?
+</div>
+<div class="flow-arrow">↓ YES → Continue | ↓ NO → Route to GYB</div>
+
+<div class="flow-step" style="background:#d1ecf1;border-color:#17a2b8">
+<strong>STEP 3:</strong> Check <a href="#copart-matrix-quick" class="internal-link">Copart Assignment Matrix</a>
+</div>
+<div class="flow-arrow">↓</div>
+
+<div id="copart-matrix-quick" class="quick-grid">
+<div class="quick-card" style="border-left-color:#28a745">
+<h4>✓ Send to Copart If:</h4>
+<ul style="font-size:14px">
+<li><strong>1st Party:</strong> No/minor coverage issues</li>
+<li><strong>3rd Party:</strong> No coverage issues + liability adverse</li>
+</ul>
+</div>
+<div class="quick-card" style="border-left-color:#dc3545">
+<h4>✗ Storage Mitigation If:</h4>
+<ul style="font-size:14px">
+<li><strong>1st Party:</strong> Major coverage issues</li>
+<li><strong>3rd Party:</strong> Disputed liability or coverage questions</li>
+</ul>
+</div>
+</div>
+
+<h3>🎯 Critical Thresholds (Memorize These)</h3>
+<table>
+<tr>
+<th>Threshold</th>
+<th>Action Required</th>
+</tr>
+<tr>
+<td><strong>48 hours since FNOL</strong></td>
+<td>Vehicle must be at controlled location (GYB/Copart)</td>
+</tr>
+<tr>
+<td><strong>65-70% ACV</strong></td>
+<td>Borderline TL - Desk Review Appraiser decides within 24hrs</td>
+</tr>
+<tr>
+<td><strong>>70% ACV</strong></td>
+<td>Automatic TL - Create Early TL Task for specialist</td>
+</tr>
+<tr>
+<td><strong>$250 supplement (non-GYB)</strong></td>
+<td>Requires Desk Review Appraiser approval</td>
+</tr>
+<tr>
+<td><strong>$500 supplement (GYB)</strong></td>
+<td>Requires review if approaching TL threshold</td>
+</tr>
+<tr>
+<td><strong>Vehicle at tow yard</strong></td>
+<td>Emergency removal within 24 hours</td>
+</tr>
+</table>
+
+<h3>📞 Who to Contact (Quick Reference)</h3>
+<div class="quick-grid">
+<div class="quick-card">
+<h4>Honk (Towing)</h4>
+<p>Use for all vehicle tows<br>
+<strong>Action:</strong> Same-day scheduling required for emergencies</p>
+</div>
+
+<div class="quick-card">
+<h4>Unit Leader</h4>
+<p>Escalate via VICE task for:<br>
+• Tow yard emergencies<br>
+• Unknown locations >4hrs<br>
+• Storage mitigation >7 days</p>
+</div>
+
+<div class="quick-card">
+<h4>@PD (Slack)</h4>
+<p>For routing guidance when uncertain about TL assessment</p>
+</div>
+</div>
+
+</div>
+
+<!-- EXECUTIVE SUMMARY (Condensed) -->
+<div id="executive" class="section">
+<div class="breadcrumb">Home > Executive Summary</div>
+
+<h2>Executive Summary</h2>
+
+<div class="alert-success">
+<strong>Mission:</strong> Establish complete control over every claimed vehicle within 24-48 hours of FNOL to minimize storage charges, reduce economic total losses, and ensure optimal claim outcomes.
+</div>
+
+<h3>Three-Pronged Strategy</h3>
+<div class="quick-grid">
+<div class="quick-card" style="border-left-color:#28a745">
+<h4>1. Control Every Vehicle Fast</h4>
+<p>Manual daily task creation ensures no vehicle sits in limbo. Within 48 hours, every claim is at GYB or Copart.</p>
+</div>
+
+<div class="quick-card" style="border-left-color:#ffc107">
+<h4>2. Decide Total Loss Early</h4>
+<p>Manual early TL task creation activates specialist workflow immediately, cutting settlement time to 12 days.</p>
+</div>
+
+<div class="quick-card" style="border-left-color:#dc3545">
+<h4>3. Zero Tolerance for Waste</h4>
+<p>GYB delivers certified repairs with cost controls. Customer-selected shops get enhanced oversight to prevent overruns.</p>
+</div>
+</div>
+
+<h3>Key Success Metrics</h3>
+<table>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+</tr>
+<tr>
+<td>Vehicle Control Rate (within 48hrs)</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>Daily Location Task Completion (by 10am)</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Total Loss Cycle Time</td>
+<td>12 days</td>
+</tr>
+<tr>
+<td>Average Advance Charges</td>
+<td><$1,500</td>
+</tr>
+<tr>
+<td>GYB Utilization</td>
+<td>45% of all claims</td>
+</tr>
+</table>
+
+<h3>Expected Outcomes</h3>
+<ul>
+<li>Reduced storage costs through rapid routing and $0 storage during coverage resolution</li>
+<li>Lower total loss ratio via early identification and parallel processing</li>
+<li>Faster claim closure (12-day TL cycle vs 15+ days)</li>
+<li>Improved coverage/liability decision quality preventing expensive vehicle retrievals</li>
+<li>Enhanced cost control on customer-selected shop repairs</li>
+<li>100% vehicle location visibility through daily task tracking</li>
+</ul>
+
+<div class="alert-info">
+<strong>For detailed implementation timeline and training plan:</strong> <a href="#" onclick="showSection('implementation');return false;" class="internal-link">View Implementation Guide</a>
+</div>
+
+</div>
+
+<!-- DAILY OPERATIONS (Consolidated SOP 1, 2C, 3) -->
+<div id="daily-ops" class="section">
+<div class="breadcrumb">Home > Daily Operations</div>
+
+<h2>Daily Operations - Standard Workflow</h2>
+
+<div class="alert-info">
+<strong>This section covers normal, daily claim handling.</strong> For exceptions (tow yards, coverage issues, customer-selected shops), see <a href="#" onclick="showSection('exceptions');return false;" class="internal-link">Exception Handling</a>.
+</div>
+
+<!-- SOP 1 -->
+<div id="sop-1">
+<div class="collapsible-header" onclick="toggleCollapsible('sop1')">
+<span>SOP 1: Post-FNOL Claim Assignment & Vehicle Routing <span class="priority-normal">Daily</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop1-content">
+
+<div class="alert-warning">
+<strong>Time Limit:</strong> Complete routing decision within 15 minutes of claim assignment
+</div>
+
+<h4>STEP 1: Review FNOL Data (First 5 Minutes)</h4>
+<ul>
+<li>Review loss date/time, vehicle details (Year/Make/Model/VIN)</li>
+<li><strong>Verify current vehicle location</strong> - contact customer if unclear</li>
+<li>Confirm drivability status</li>
+<li>Review damage description and photos</li>
+<li>Verify coverage and deductible</li>
+</ul>
+
+<h4>STEP 2: Immediate Risk Check</h4>
+<div class="alert-danger">
+<strong>🚨 IS VEHICLE AT TOW YARD?</strong><br>
+If YES → STOP. Escalate to Unit Leader via task immediately. <a href="#" onclick="showSection('exceptions');scrollToSOP('2b');return false;" class="internal-link">Follow SOP 2B</a>.
+</div>
+
+<h4>STEP 3: Quick TL Assessment (Next 5 Minutes)</h4>
+
+<div class="alert-info">
+<strong>⚡ IMPORTANT:</strong> If TL is projected, you MUST also check the <a href="#copart-assignment-matrix" class="internal-link">Copart Assignment Matrix</a> below. Not all TL vehicles go to Copart.
+</div>
+
+<table>
+<tr style="background:#d4edda">
+<td><strong>Clearly Repairable</strong></td>
+<td>→ Route to GYB</td>
+</tr>
+<tr><td colspan="2" style="font-size:13px;padding-left:20px">
+• Minor-to-moderate body damage only<br>
+• No airbag deployment<br>
+• No structural damage<br>
+• Single-panel damage or fender bender
+</td></tr>
+<tr style="background:#fff3cd">
+<td><strong>Borderline/Uncertain</strong></td>
+<td>→ Route to GYB for estimate | <strong>Slack @PD for guidance</strong></td>
+</tr>
+<tr><td colspan="2" style="font-size:13px;padding-left:20px">
+• Moderate damage with airbag deployment<br>
+• Possible structural damage<br>
+• Older vehicle with significant body damage
+</td></tr>
+<tr style="background:#d1ecf1">
+<td><strong>Clear Total Loss Indicators</strong></td>
+<td>→ <strong>Check Copart Matrix Below ↓</strong></td>
+</tr>
+<tr><td colspan="2" style="font-size:13px;padding-left:20px">
+• Rollover, fire/flood, theft recovery<br>
+• Multiple airbag deployment (front + side + curtain)<br>
+• Severe structural/frame damage visible
+</td></tr>
+</table>
+
+<div id="copart-assignment-matrix" style="background:#d1ecf1;border:3px solid #17a2b8;padding:16px;margin:20px 0;border-radius:8px">
+<h4 style="margin-top:0">⚡ COPART ASSIGNMENT MATRIX - CRITICAL DECISION POINT</h4>
+
+<strong>1st Party Claims:</strong>
+<table style="margin:12px 0">
+<tr style="background:#d4edda">
+<td>Projected TL + No/Minor Coverage Issues</td>
+<td>→ <strong>Copart 100%</strong></td>
+</tr>
+<tr style="background:#f8d7da">
+<td>Projected TL + Major Coverage Issues<br><span style="font-size:12px">(Unlisted driver, date of loss outside policy, etc.)</span></td>
+<td>→ <strong>Storage Mitigation</strong> <a href="#" onclick="showSection('exceptions');scrollToSOP('2d');return false;" class="internal-link">SOP 2D</a></td>
+</tr>
+</table>
+
+<strong>3rd Party Claims:</strong>
+<table style="margin:12px 0">
+<tr style="background:#d4edda">
+<td>Projected TL + No Coverage Issues + Liability Adverse<br><span style="font-size:12px">(Claimant parked/unoccupied, rear-ended, etc.)</span></td>
+<td>→ <strong>Copart 100%</strong></td>
+</tr>
+<tr style="background:#f8d7da">
+<td>All Other 3rd Party Scenarios<br><span style="font-size:12px">(Disputed liability, comparative negligence, etc.)</span></td>
+<td>→ <strong>Storage Mitigation</strong> <a href="#" onclick="showSection('exceptions');scrollToSOP('2d');return false;" class="internal-link">SOP 2D</a></td>
+</tr>
+</table>
+</div>
+
+<h4>STEP 4: Vehicle Movement (Same Day)</h4>
+<ul>
+<li><strong>If DRIVABLE:</strong> Direct owner to drive to facility (GYB or Copart) same day/next morning</li>
+<li><strong>If NOT DRIVABLE:</strong> Contact Honk immediately, schedule same-day pickup</li>
+<li>Provide facility address, confirm arrival time</li>
+<li>Document scheduled arrival, set 24-hour follow-up task</li>
+</ul>
+
+</div>
+</div>
+
+<!-- SOP 2C -->
+<div id="sop-2c">
+<div class="collapsible-header" onclick="toggleCollapsible('sop2c')">
+<span>SOP 2C: Daily Location Tracking - Manual Task System <span class="priority-critical">Daily Required</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop2c-content">
+
+<div class="alert-warning">
+<strong>📍 Purpose:</strong> Every open claim gets a daily location task. Target: 100% completion by 10am.
+</div>
+
+<h4>STEP 1: Create Daily Location Task (Every Morning - First Action)</h4>
+<ul>
+<li>Adjuster <strong>manually creates</strong> "Daily Location Verification" task in VICE for each assigned open claim</li>
+<li>Create tasks within first 30 minutes of shift</li>
+<li>Task title format: "Daily Location Check - [Claim #]"</li>
+</ul>
+
+<h4>STEP 2: Verify Current Location</h4>
+<ul>
+<li>Check claim notes for most recent location entry</li>
+<li>If unchanged → Complete task: "Location verified - [Location Name]"</li>
+<li>If changed → Update claim notes AND complete task with new location</li>
+<li>If unknown → Contact customer within 1 hour</li>
+</ul>
+
+<h4>STEP 3: Location Status Assessment</h4>
+<table>
+<tr style="background:#d4edda">
+<td><strong>GYB or Copart</strong></td>
+<td>✓ Optimal - Note status, complete task</td>
+</tr>
+<tr style="background:#fff3cd">
+<td><strong>Owner's Residence</strong></td>
+<td>⚠ Verify movement scheduled within 48hrs, create follow-up task</td>
+</tr>
+<tr style="background:#fff3cd">
+<td><strong>Customer-Selected Shop</strong></td>
+<td>⚠ Verify progress, complete task</td>
+</tr>
+<tr style="background:#f8d7da">
+<td><strong>Tow Yard</strong></td>
+<td>🚨 EMERGENCY - Create Unit Leader task immediately</td>
+</tr>
+<tr style="background:#f8d7da">
+<td><strong>Unknown</strong></td>
+<td>🚨 CRITICAL - Cannot complete task until location determined</td>
+</tr>
+</table>
+
+<div class="alert-success">
+<strong>Success Metrics:</strong><br>
+• 100% daily task creation rate (every open claim)<br>
+• 100% completion rate by 10am<br>
+• Zero unknown locations at end of day
+</div>
+
+</div>
+</div>
+
+<!-- SOP 3 -->
+<div id="sop-3">
+<div class="collapsible-header" onclick="toggleCollapsible('sop3')">
+<span>SOP 3: GYB Repair Process Management <span class="priority-normal">Primary Workflow</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop3-content">
+
+<div class="alert-success">
+<strong>🎯 This is the bread and butter:</strong> 75% of claims follow this path. Smooth, fast, controlled repairs = happy customers + controlled costs.
+</div>
+
+<h4>Day 1: Vehicle Arrival at GYB</h4>
+<ul>
+<li>Confirm vehicle arrival in VICE claim notes</li>
+<li>Verify GYB has customer contact info</li>
+<li>Confirm estimate timeline (2-3 business days)</li>
+<li>Authorize rental if applicable</li>
+<li>Customer communication: "Your vehicle is at our partner shop, estimate in 2-3 days"</li>
+</ul>
+
+<h4>Days 2-4: GYB Estimate Creation & Submission</h4>
+<ul>
+<li>GYB completes teardown and damage assessment</li>
+<li>Documents all damage with photos in CCC</li>
+<li><strong>Uploads estimate to CCC within 2-3 business days</strong></li>
+</ul>
+
+<h4>Days 3-5: Estimate Review</h4>
+
+<strong>CCC Auto-Approval or Manual Review:</strong>
+<ul>
+<li>CCC checks estimate against business rules automatically</li>
+<li>If passes → Auto-approved</li>
+<li>If flagged → Desk Review Appraiser performs manual review</li>
+</ul>
+
+<table style="margin:12px 0">
+<tr style="background:#d4edda">
+<td><strong><65% ACV</strong> (75% of estimates)</td>
+<td>REPAIRABLE → Adjuster authorizes repair within 24 hours</td>
+</tr>
+<tr style="background:#fff3cd">
+<td><strong>65-75% ACV</strong> (15% of estimates)</td>
+<td>BORDERLINE → Desk Review Appraiser makes final call in 24hrs</td>
+</tr>
+<tr style="background:#f8d7da">
+<td><strong>>70% ACV</strong> (10% of estimates)</td>
+<td>AUTOMATIC TL → Do NOT authorize repair, create TL Task</td>
+</tr>
+</table>
+
+<h4>Days 6-14: Repair Execution (Repairable Path)</h4>
+<ul>
+<li>Adjuster approves estimate in VICE within 24 hours</li>
+<li>GYB orders parts and begins repair</li>
+<li>Monitor for supplements (review within 24 hours)</li>
+<li>Weekly progress check if repair >7 days</li>
+<li>GYB completes final QA inspection</li>
+<li>Customer picks up vehicle</li>
+<li><strong>Target: 14 days from FNOL to vehicle return</strong></li>
+</ul>
+
+<div class="alert-warning">
+<strong>Supplement Management:</strong> If supplements push total to 65-70% ACV → Create TL Task. If >70% ACV → STOP WORK immediately, convert to TL.
+</div>
+
+</div>
+</div>
+
+</div>
+
+<!-- EXCEPTION HANDLING (Consolidated SOP 2A, 2B, 2D) -->
+<div id="exceptions" class="section">
+<div class="breadcrumb">Home > Exception Handling</div>
+
+<h2>Exception Handling - When Things Go Wrong</h2>
+
+<div class="alert-warning">
+<strong>This section covers scenarios outside normal workflow.</strong> Use these procedures only when the situation matches the trigger conditions.
+</div>
+
+<!-- SOP 2A -->
+<div id="sop-2a">
+<div class="collapsible-header" onclick="toggleCollapsible('sop2a')" style="background:linear-gradient(135deg,#ffc107 0%,#e0a800 100%);color:#333">
+<span>SOP 2A: Customer-Selected Shop - Enhanced Risk Management <span class="priority-high">High Oversight</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop2a-content">
+
+<div class="alert-warning">
+<strong>When This Applies:</strong> Customer selects a repair shop outside the GYB network.<br>
+<strong>Key Principle:</strong> MORE stringent oversight than GYB due to lack of contractual cost controls.
+</div>
+
+<h4>Required Actions (Summary)</h4>
+<ol>
+<li><strong>Document choice</strong> and manually create daily monitoring task in VICE</li>
+<li><strong>Assign Desk Review Appraiser</strong> within 4 hours (mandatory, not optional)</li>
+<li><strong>100% manual review</strong> of estimate (no auto-approval)</li>
+<li><strong>$250 supplement threshold</strong> (vs $500 for GYB) - all require Appraiser approval</li>
+<li><strong>Daily progress monitoring</strong> - contact shop every 3 business days</li>
+<li><strong>Quality verification</strong> before customer pickup</li>
+</ol>
+
+<div class="alert-danger">
+<strong>Zero Tolerance:</strong> No economic TL conversions after repair authorization. If estimate + supplements reach 65% ACV, create TL Task immediately.
+</div>
+
+<strong>Success Metrics:</strong>
+<ul>
+<li>100% estimate review rate by Desk Review Appraiser</li>
+<li>100% supplement review for amounts >$250</li>
+<li>Average repair cycle time <18 days (vs 14 for GYB)</li>
+</ul>
+
+</div>
+</div>
+
+<!-- SOP 2B -->
+<div id="sop-2b">
+<div class="collapsible-header" onclick="toggleCollapsible('sop2b')" style="background:linear-gradient(135deg,#dc3545 0%,#c82333 100%)">
+<span>SOP 2B: 🚨 Tow Yard Emergency - Elimination Protocol <span class="priority-critical">24hr Removal</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop2b-content">
+
+<div class="alert-danger" style="text-align:center;font-size:18px">
+<strong>🚨 ZERO TOLERANCE FOR TOW YARD DWELL TIME 🚨</strong><br>
+Vehicle MUST be removed within 24 hours - Focus on removal, not negotiation
+</div>
+
+<h4>IMMEDIATE ACTIONS (Same Day)</h4>
+
+<strong>1. Unit Leader Escalation (Within 1 Hour)</strong>
+<ul>
+<li>Notify Unit Leader via task immediately</li>
+<li>Document discovery time in claim notes</li>
+<li>Obtain tow yard contact + daily storage rate</li>
+</ul>
+
+<strong>2. Emergency Damage Assessment (Within 2 Hours)</strong>
+<ul>
+<li>Obvious TL (rollover, burn, theft recovery) → Route to Copart</li>
+<li>Likely repairable (moderate damage, no structural) → Route to GYB</li>
+<li>Uncertain → Default to GYB, transfer to Copart if TL confirmed</li>
+</ul>
+
+<strong>3. Emergency Tow Coordination (Within 4 Hours)</strong>
+<ul>
+<li>Contact Honk immediately</li>
+<li>Request same-day or next-morning pickup</li>
+<li>Notify tow yard of scheduled pickup to stop charges</li>
+<li>Document tow authorization and tracking number</li>
+</ul>
+
+<div class="alert-info">
+<strong>💰 Cost Handling:</strong> Tow yard cost negotiation will be handled by Total Loss Specialist as part of settlement process.
+</div>
+
+<strong>4. Root Cause Analysis (Within 48 Hours)</strong>
+<ul>
+<li>Unit Leader investigates how vehicle ended up at tow yard</li>
+<li>Identify process gap or training need</li>
+<li>Implement corrective action</li>
+</ul>
+
+</div>
+</div>
+
+<!-- SOP 2D -->
+<div id="sop-2d">
+<div class="collapsible-header" onclick="toggleCollapsible('sop2d')" style="background:linear-gradient(135deg,#ffc107 0%,#e0a800 100%);color:#333">
+<span>SOP 2D: ⚠ Storage Mitigation Process <span class="priority-high">Coverage/Liability Issues</span></span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop2d-content">
+
+<div class="alert-warning">
+<strong>When This Applies:</strong> Projected TL vehicle that CANNOT go to Copart due to coverage or liability issues per Copart Assignment Matrix.
+</div>
+
+<h4>Objective: Minimize Storage Costs While Resolving Coverage/Liability</h4>
+
+<strong>PHASE 1: Immediate Assessment (Day 0 - Within 4 Hours)</strong>
+<ol>
+<li>Document coverage/liability issue in VICE</li>
+<li>Create "Storage Mitigation Active" task</li>
+<li>Verify current vehicle location</li>
+<li>If at tow yard → Emergency removal within 24 hours (same as SOP 2B)</li>
+<li>Contact owner to explain situation and present options</li>
+</ol>
+
+<strong>PHASE 2: Storage Solution Selection (Day 0-1)</strong>
+
+<table>
+<tr style="background:#d4edda">
+<td><strong>Option 1: Owner's Residence</strong></td>
+<td>$0 - Preferred for all scenarios</td>
+</tr>
+<tr style="background:#d4edda">
+<td><strong>Option 2: GYB Temporary Storage</strong></td>
+<td>$0 (30 days free) - If owner has no space</td>
+</tr>
+<tr style="background:#fff3cd">
+<td><strong>Option 3: Selected Shop Storage</strong></td>
+<td>$135-150/day - Requires Unit Leader approval</td>
+</tr>
+<tr style="background:#f8d7da">
+<td><strong>Never: Tow Yard</strong></td>
+<td>$175+/day - Only if already there, remove immediately</td>
+</tr>
+</table>
+
+<strong>PHASE 3: Resolution (Days 1-10)</strong>
+<ul>
+<li>Coverage investigation: 7-day resolution deadline</li>
+<li>Liability investigation (3rd party): 5-day preliminary determination</li>
+<li>Update owner every 3 days</li>
+<li>Update "Storage Mitigation Active" task every 2 business days</li>
+</ul>
+
+<strong>PHASE 4: Final Disposition (Days 7-14)</strong>
+<ul>
+<li>Coverage/Liability CONFIRMED → Transfer to TL Specialist, proceed to Copart</li>
+<li>Coverage DENIED → Return vehicle to owner, close claim</li>
+<li>Partial Coverage → Coordinate settlement with TL Specialist</li>
+</ul>
+
+<div class="alert-success">
+<strong>Success Metrics:</strong><br>
+• 100% of vehicles out of tow yards within 24 hours<br>
+• 90% at $0 storage within 48 hours<br>
+• 80% resolved within 14 days<br>
+• Average storage cost <$500 per claim
+</div>
+
+</div>
+</div>
+
+</div>
+
+<!-- TOTAL LOSS PROCESS (SOP 4) -->
+<div id="total-loss" class="section">
+<div class="breadcrumb">Home > Total Loss Process</div>
+
+<h2>Total Loss Process - Early Task-Based Assessment</h2>
+
+<div class="alert-info">
+<strong>Philosophy:</strong> Identify and activate TL workflow as early as possible to minimize costs and expedite settlement. Total Loss Specialists begin parallel work immediately upon TL indicators.
+</div>
+
+<div class="collapsible-header" onclick="toggleCollapsible('sop4')">
+<span>SOP 4: Total Loss Process - 12-Day Settlement Target</span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="sop4-content">
+
+<h3>PHASE 1: Early TL Task Activation (Days 0-2)</h3>
+
+<div class="alert-warning">
+<strong>Trigger:</strong> Adjuster or Desk Review Appraiser <strong>manually creates</strong> "Early TL Assessment Task" when ANY TL indicator present:
+<ul style="margin:8px 0">
+<li>Vehicle routed to Copart (obvious TL)</li>
+<li>Damage suggests >70% severity</li>
+<li>Estimate received showing ≥65% ACV</li>
+<li>Multiple airbags + structural damage</li>
+<li>Flood, fire, or theft recovery</li>
+</ul>
+</div>
+
+<strong>Adjuster Action:</strong>
+<ul>
+<li>Create "Early TL Assessment" task in VICE within 4 hours</li>
+<li>Assign to Total Loss Specialist queue</li>
+<li>Include vehicle location, damage description, estimate if available</li>
+<li>Continue normal claim processing while TL Specialist works in parallel</li>
+</ul>
+
+<strong>Total Loss Specialist - Immediate Parallel Work:</strong>
+<ul>
+<li>Run preliminary ACV valuation in CCC</li>
+<li>Research comparable vehicles</li>
+<li>Pull title information, identify lienholder</li>
+<li>Contact lienholder for payoff quote if financed</li>
+<li>Prepare settlement calculation template</li>
+<li>Set up salvage auction notification with Copart</li>
+</ul>
+
+<h3>PHASE 2: Final TL Determination (Days 1-3)</h3>
+
+<strong>Desk Review Appraiser:</strong>
+<ul>
+<li>Reviews estimate or damage assessment</li>
+<li>Compares repair cost to ACV</li>
+<li>If ≥70% ACV → Confirms total loss</li>
+<li>If 65-70% ACV → Makes determination within 24 hours</li>
+<li><strong>Manually updates</strong> task to "TL Confirmed" status</li>
+</ul>
+
+<strong>Total Loss Specialist:</strong>
+<ul>
+<li>Receives "TL Confirmed" task notification</li>
+<li>Reviews all parallel work already completed</li>
+<li>Confirms vehicle location (Copart or GYB)</li>
+<li>Finalizes settlement offer</li>
+<li><strong>Target: Settlement offer ready within 24 hours of TL confirmation</strong></li>
+</ul>
+
+<h3>PHASE 3: Settlement Offer (Days 2-5)</h3>
+
+<ul>
+<li>Call owner to explain TL determination</li>
+<li>Present settlement breakdown (ACV, salvage, deductible)</li>
+<li>Email formal settlement letter with documentation</li>
+<li>TL Specialist manually creates task: "Awaiting Owner Documents"</li>
+</ul>
+
+<strong>Required Documents:</strong> Title, signed settlement agreement, proof of loss, license plate return
+
+<h3>PHASE 4: Payment Processing (Days 6-12)</h3>
+
+<ul>
+<li>Verify all documents received and complete</li>
+<li>Process payment within 3 business days</li>
+<li>If financed: Two-party check or direct payoff to lienholder</li>
+<li>If owned: Check directly to owner</li>
+<li>TL Specialist creates task: "Payment Issued - Awaiting Title Transfer"</li>
+</ul>
+
+<h4>Tow Yard Cost Negotiation (If Applicable)</h4>
+
+<div class="alert-warning">
+<strong>Total Loss Specialist Responsibility:</strong> If vehicle incurred tow yard charges before being moved:
+<ul style="margin:8px 0">
+<li>Request itemized invoice for all charges</li>
+<li>Challenge excessive rates (>$175/day)</li>
+<li>Negotiate to pay only actual days stored</li>
+<li>Escalate to Unit Leader via task if unreasonable</li>
+<li>Include tow yard charges in final settlement calculation</li>
+</ul>
+</div>
+
+<h3>PHASE 5: Salvage & Closure</h3>
+
+<ul>
+<li>Vehicle enters Copart auction after title received</li>
+<li>Auction completes within 1-2 weeks</li>
+<li>Salvage proceeds credited within 48 hours</li>
+<li>TL Specialist closes claim in VICE</li>
+</ul>
+
+<div class="alert-success">
+<strong>✓ TARGET CYCLE TIME: 12 DAYS</strong><br>
+Days 0-1: TL indicators → Early Task created → Parallel work begins<br>
+Days 1-2: Final TL determination, vehicle at Copart/GYB<br>
+Days 2-3: Settlement offer presented<br>
+Days 4-8: Owner document collection<br>
+Days 9-12: Payment and title transfer<br>
+<br>
+<strong>Success Metric:</strong> 80% of TL claims settled within 12 days
+</div>
+
+</div>
+
+</div>
+
+<!-- METRICS (Simplified) -->
+<div id="metrics" class="section">
+<div class="breadcrumb">Home > Metrics Dashboard</div>
+
+<h2>Metrics Dashboard & Success Measurement</h2>
+
+<h3>Tier 1: Critical Process Metrics (Daily Tracking)</h3>
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Why It Matters</th>
+</tr>
+<tr>
+<td><strong>Vehicle Control Rate</strong></td>
+<td>95% within 48hrs</td>
+<td>Prevents storage costs and delays</td>
+</tr>
+<tr>
+<td><strong>Daily Task Completion</strong></td>
+<td>100% by 10am</td>
+<td>Ensures every vehicle location is known</td>
+</tr>
+<tr>
+<td><strong>Avg Days to Control</strong></td>
+<td><2.0 days</td>
+<td>Speed = cost savings</td>
+</tr>
+<tr>
+<td><strong>Avg Advance Charges</strong></td>
+<td><$1,500</td>
+<td>Direct cost impact</td>
+</tr>
+</table>
+
+<h3>Tier 2: Quality & Efficiency Metrics (Weekly Tracking)</h3>
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Why It Matters</th>
+</tr>
+<tr>
+<td><strong>Early TL Identification Rate</strong></td>
+<td>>60%</td>
+<td>Prevents wasted repair costs</td>
+</tr>
+<tr>
+<td><strong>TL Cycle Time</strong></td>
+<td><12 days</td>
+<td>Reduces rental duration, speeds salvage recovery</td>
+</tr>
+<tr>
+<td><strong>Storage Mitigation Activation</strong></td>
+<td>100% within 4hrs</td>
+<td>Prevents tow yard charges on questionable claims</td>
+</tr>
+<tr>
+<td><strong>Storage Mitigation Resolution</strong></td>
+<td><14 days</td>
+<td>Faster resolution = lower storage costs</td>
+</tr>
+<tr>
+<td><strong>Free Storage Utilization (Mitigation)</strong></td>
+<td>>90%</td>
+<td>Effectiveness of moving vehicles out of expensive lots</td>
+</tr>
+</table>
+
+<h3>Tier 3: Outcome Metrics (Monthly/Quarterly Tracking)</h3>
+
+<h4>Track Monthly:</h4>
+<ul>
+<li><strong>Total Loss Ratio:</strong> % of physical damage claims classified as total loss (track trend, not absolute)</li>
+<li><strong>Average Storage Cost per Claim:</strong> Total storage charges / total claims (compare pre/post program)</li>
+<li><strong>Repair Cost Variance:</strong> Average repair cost GYB vs customer-selected shops (quantify savings)</li>
+<li><strong>Average Claim Cycle Time:</strong> Days from FNOL to final payment across all claim types</li>
+<li><strong>Supplement Frequency:</strong> % of GYB repairs requiring supplements vs customer-selected shops</li>
+<li><strong>Customer Satisfaction Score:</strong> NPS or CSAT for claims handled through VCP</li>
+</ul>
+
+<h4>Dashboard Meeting Structure:</h4>
+
+<strong>Daily Huddle Report (Claims Team):</strong>
+<ul>
+<li>Daily location task creation rate (every open claim)</li>
+<li>Daily location task completion rate (target: 100% by 10am)</li>
+<li>Vehicles awaiting control (>48 hours since FNOL)</li>
+<li>Active Storage Mitigation cases and resolution status</li>
+<li>Tow yard incidents (if any)</li>
+<li>Pending TL determinations (>48 hours old)</li>
+<li>Early TL assessment tasks created vs TL indicators identified</li>
+<li>Customer-selected shop claims requiring enhanced monitoring</li>
+</ul>
+
+<strong>Weekly Management Report:</strong>
+<ul>
+<li>All Tier 1 metrics with trend arrows</li>
+<li>Tier 2 metrics summary</li>
+<li>Manual task creation and completion metrics</li>
+<li>Storage Mitigation metrics: Active cases, avg resolution time, free storage utilization</li>
+<li>Top 3 process bottlenecks</li>
+<li>Exception summary (customer-selected shops, extended cycles, tow yard incidents)</li>
+<li>Customer-selected shop cost variance analysis (vs GYB benchmarks)</li>
+<li>Task creation compliance by adjuster</li>
+</ul>
+
+<strong>Monthly Executive Report:</strong>
+<ul>
+<li>All Tier 1, 2, and 3 metrics</li>
+<li>Cost impact analysis (where data permits)</li>
+<li>Process improvement recommendations</li>
+<li>Vendor performance (GYB and Copart)</li>
+<li>Customer satisfaction trends</li>
+</ul>
+
+</div>
+
+<!-- ROLE GUIDES (NEW - Printable Checklists) -->
+<div id="role-guides" class="section">
+<div class="breadcrumb">Home > Role Guides</div>
+
+<h2>Role-Specific Quick Reference Guides</h2>
+
+<div class="alert-info">
+<strong>Purpose:</strong> Printable one-page checklists for each role. Click role to expand, then use "Print This Guide" to create a physical reference card.
+</div>
+
+<!-- Adjuster Guide -->
+<div class="collapsible-header" onclick="toggleRoleGuide('adjuster')">
+<span>🎯 Adjuster Daily Checklist</span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="adjuster-content">
+<div class="printable-checklist">
+<button class="print-button" onclick="window.print()">🖨 Print This Guide</button>
+
+<strong>Every Morning (First 30 Minutes):</strong>
+<ul>
+<li>☐ Create daily location verification tasks for ALL open claims</li>
+<li>☐ Complete all location tasks by 10am</li>
+<li>☐ Review new claim assignments</li>
+<li>☐ Check for emergencies (tow yards, unknown locations)</li>
+</ul>
+
+<strong>When Handling New Claims:</strong>
+<ul>
+<li>☐ Verify vehicle location within 15 minutes</li>
+<li>☐ Apply routing decision tree (GYB, Copart, or Storage Mitigation)</li>
+<li>☐ Check Copart Assignment Matrix for all projected TL</li>
+<li>☐ Document routing decision in VICE</li>
+<li>☐ Schedule vehicle movement (same day if possible)</li>
+</ul>
+
+<strong>When TL Indicators Present:</strong>
+<ul>
+<li>☐ Manually create "Early TL Assessment" task within 4 hours</li>
+<li>☐ Assign to Total Loss Specialist queue</li>
+<li>☐ Include all relevant details (location, damage, estimate)</li>
+</ul>
+
+<strong>Emergency Escalations (Create Task Immediately):</strong>
+<ul>
+<li>☐ Vehicle at tow yard → Unit Leader task</li>
+<li>☐ Unknown location >4 hours → Unit Leader task</li>
+<li>☐ Storage mitigation needed → Create mitigation task</li>
+</ul>
+
+<strong>Critical Thresholds to Remember:</strong>
+<ul>
+<li>48 hours = Vehicle must be at controlled location</li>
+<li>65-70% ACV = Borderline TL zone</li>
+<li>>70% ACV = Automatic TL</li>
+<li>$250 supplement = Requires approval (non-GYB)</li>
+</ul>
+</div>
+</div>
+
+<!-- Desk Review Appraiser Guide -->
+<div class="collapsible-header" onclick="toggleRoleGuide('appraiser')">
+<span>🎯 Desk Review Appraiser Daily Checklist</span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="appraiser-content">
+<div class="printable-checklist">
+<button class="print-button" onclick="window.print()">🖨 Print This Guide</button>
+
+<strong>Repairability Triage (Initial Assessment):</strong>
+<ul>
+<li>☐ Review all customer-selected shop claims assigned in CCC</li>
+<li>☐ Perform initial repairability assessment within 24 hours of assignment</li>
+<li>☐ Run ACV valuation in CCC for borderline cases</li>
+<li>☐ Make preliminary determination: Repairable vs TL potential</li>
+<li>☐ If TL potential (≥65% ACV) → Flag for enhanced monitoring</li>
+</ul>
+
+<strong>Method of Inspection Triage:</strong>
+<ul>
+<li>☐ Determine inspection method based on damage severity and location</li>
+<li>☐ GYB estimates: Review uploaded estimate in CCC (shop inspects)</li>
+<li>☐ Customer-selected shops: Assign method (photo, virtual, or physical inspection)</li>
+<li>☐ Complex/borderline cases: Consider requesting teardown for hidden damage</li>
+<li>☐ Document inspection method selected in CCC</li>
+</ul>
+
+<strong>Complete Estimate Reviews:</strong>
+<ul>
+<li>☐ <strong>GYB Estimates (flagged for manual review):</strong></li>
+<li style="margin-left:20px">- Review line-by-line for accuracy and completeness</li>
+<li style="margin-left:20px">- Verify parts pricing (OEM vs aftermarket appropriate)</li>
+<li style="margin-left:20px">- Validate labor hours and rates</li>
+<li style="margin-left:20px">- Compare to ACV to determine repairability</li>
+<li style="margin-left:20px">- Target: Complete review within 24 hours</li>
+<li>☐ <strong>Customer-Selected Shop Estimates (100% manual review):</strong></li>
+<li style="margin-left:20px">- Detailed line-by-line review (NO auto-approval)</li>
+<li style="margin-left:20px">- Validate all parts pricing against market rates</li>
+<li style="margin-left:20px">- Verify labor hours against industry standards</li>
+<li style="margin-left:20px">- Compare estimate to GYB pricing benchmarks</li>
+<li style="margin-left:20px">- Challenge any excessive charges before authorization</li>
+<li style="margin-left:20px">- Target: Complete review within 48-72 hours</li>
+</ul>
+
+<strong>Writing Estimates (When Required):</strong>
+<ul>
+<li>☐ For photo inspections: Write detailed estimate based on photos and description</li>
+<li>☐ For physical inspections: Document all damage with photos in CCC</li>
+<li>☐ Include all visible and anticipated hidden damage</li>
+<li>☐ Use appropriate parts (OEM vs aftermarket per policy/severity)</li>
+<li>☐ Apply correct labor operations and times</li>
+<li>☐ Calculate paint and materials accurately</li>
+<li>☐ Include all necessary sublet operations</li>
+<li>☐ Document estimate rationale in notes</li>
+</ul>
+
+<strong>Total Loss Determinations:</strong>
+<ul>
+<li>☐ <strong>Automatic TL (>70% ACV):</strong> Document in CCC, notify Adjuster immediately</li>
+<li>☐ <strong>Borderline TL (65-70% ACV):</strong> Make final determination within 24 hours</li>
+<li>☐ Consider: Vehicle age, mileage, pre-existing damage, hidden damage likelihood</li>
+<li>☐ If TL confirmed: Manually update task to "TL Confirmed" and create TL Task in VICE</li>
+<li>☐ If repairable: Approve with low supplement threshold ($500 max) and enhanced monitoring</li>
+</ul>
+
+<strong>Supplement Reviews:</strong>
+<ul>
+<li>☐ Review ALL supplements >$250 from customer-selected shops within 24 hours</li>
+<li>☐ Review supplements from GYB when approaching TL threshold</li>
+<li>☐ Validate additional damage is legitimate and reasonably priced</li>
+<li>☐ If supplement pushes total to 65-70% → Re-evaluate TL potential immediately</li>
+<li>☐ If supplement pushes total >70% → STOP WORK, convert to TL</li>
+</ul>
+
+<strong>Critical Responsibilities:</strong>
+<ul>
+<li>Final authority on borderline TL determinations (65-70% ACV)</li>
+<li>100% review rate on customer-selected shop estimates</li>
+<li>Cost control through detailed estimate validation</li>
+<li>Create TL Tasks in VICE when TL confirmed</li>
+</ul>
+</div>
+</div>
+
+<!-- Total Loss Specialist Guide -->
+<div class="collapsible-header" onclick="toggleRoleGuide('tl-specialist')">
+<span>🎯 Total Loss Specialist Daily Checklist</span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="tl-specialist-content">
+<div class="printable-checklist">
+<button class="print-button" onclick="window.print()">🖨 Print This Guide</button>
+
+<strong>When "Early TL Assessment" Task Received:</strong>
+<ul>
+<li>☐ Begin parallel work immediately (don't wait for final confirmation)</li>
+<li>☐ Run preliminary ACV valuation in CCC</li>
+<li>☐ Research 3-5 comparable vehicles</li>
+<li>☐ Pull title info and identify lienholder</li>
+<li>☐ Contact lienholder for payoff quote if financed</li>
+<li>☐ Prepare settlement calculation template</li>
+</ul>
+
+<strong>When "TL Confirmed" Task Received:</strong>
+<ul>
+<li>☐ Review all parallel work completed</li>
+<li>☐ Confirm vehicle location (Copart or GYB)</li>
+<li>☐ Finalize settlement offer within 24 hours</li>
+<li>☐ Call owner to present settlement</li>
+<li>☐ Email formal settlement letter</li>
+<li>☐ Create "Awaiting Owner Documents" task</li>
+</ul>
+
+<strong>Document Collection Phase:</strong>
+<ul>
+<li>☐ Track: Title, signed agreement, proof of loss, plate return</li>
+<li>☐ Follow up every 3 days if not received</li>
+<li>☐ Process payment within 3 business days of receipt</li>
+</ul>
+
+<strong>If Tow Yard Charges Incurred:</strong>
+<ul>
+<li>☐ Request itemized invoice</li>
+<li>☐ Challenge excessive rates (>$175/day)</li>
+<li>☐ Negotiate actual days only</li>
+<li>☐ Include in final settlement calculation</li>
+</ul>
+
+<strong>Target Cycle Time: 12 Days from FNOL to Payment</strong>
+</div>
+</div>
+
+<!-- Unit Leader Guide -->
+<div class="collapsible-header" onclick="toggleRoleGuide('unit-leader')">
+<span>🎯 Unit Leader Daily Checklist</span>
+<span class="arrow">▼</span>
+</div>
+<div class="collapsible-content" id="unit-leader-content">
+<div class="printable-checklist">
+<button class="print-button" onclick="window.print()">🖨 Print This Guide</button>
+
+<strong>Daily Monitoring (Every Morning):</strong>
+<ul>
+<li>☐ Check daily location task completion rate (target: 100% by 10am)</li>
+<li>☐ Review tow yard escalation tasks (if any)</li>
+<li>☐ Review active Storage Mitigation cases for daily progress</li>
+<li>☐ Identify vehicles >48 hours without movement</li>
+<li>☐ Conduct daily huddle with team</li>
+</ul>
+
+<strong>Weekly Reviews (Every Friday):</strong>
+<ul>
+<li>☐ Review all Tier 1 and Tier 2 metrics with team</li>
+<li>☐ Audit location changes from the week</li>
+<li>☐ Review Storage Mitigation cases >7 days old</li>
+<li>☐ Review customer-selected shop supplement frequency</li>
+<li>☐ Review task creation compliance by adjuster</li>
+<li>☐ Spot-check 10% of daily location tasks</li>
+</ul>
+
+<strong>When Tow Yard Escalation Received:</strong>
+<ul>
+<li>☐ Acknowledge task within 1 hour</li>
+<li>☐ Verify emergency removal plan in place</li>
+<li>☐ Monitor until vehicle removed (within 24 hours)</li>
+<li>☐ Conduct root cause analysis within 48 hours</li>
+<li>☐ Implement corrective action</li>
+</ul>
+
+<strong>Monthly Responsibilities:</strong>
+<ul>
+<li>☐ Present comprehensive metrics to leadership</li>
+<li>☐ Review GYB and Copart vendor performance</li>
+<li>☐ Lead continuous improvement initiatives</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<!-- IMPLEMENTATION (Condensed) -->
+<div id="implementation" class="section">
+<div class="breadcrumb">Home > Implementation Guide</div>
+
+<h2>Implementation Guide</h2>
+
+<h3>Launch Timeline</h3>
+
+<table>
+<tr>
+<th>Phase</th>
+<th>Timeline</th>
+<th>Key Activities</th>
+</tr>
+<tr>
+<td><strong>Foundation</strong></td>
+<td>Weeks 1-2</td>
+<td>Internal process launch, training completion, manual task workflow training<br><strong><a href="https://www.google.com/maps/d/u/0/edit?mid=1KVpkGyuNh3Q_gRqpUi2w36eZHKPOt5c&ll=17.481048749475377%2C-106.79727916249999&z=4" target="_blank" class="internal-link">→ Review GYB Network Coverage Map</a></strong></td>
+</tr>
+<tr>
+<td><strong>Full Launch</strong></td>
+<td>Weeks 3-4</td>
+<td>Apply to all claims, daily monitoring, process refinement</td>
+</tr>
+<tr>
+<td><strong>Stabilization</strong></td>
+<td>Weeks 5-8</td>
+<td>Metrics reporting rhythm, weekly reviews, optimization</td>
+</tr>
+<tr>
+<td><strong>Optimization</strong></td>
+<td>Ongoing</td>
+<td>Monthly reviews, continuous improvement</td>
+</tr>
+</table>
+
+<h3>Training Program</h3>
+
+<strong>Phase 1: Initial Training (Week 1 - 8 hours total)</strong>
+<ol>
+<li>Program Overview & Strategy (1 hour)</li>
+<li>Post-FNOL Processing & Vehicle Routing (2 hours)</li>
+<li>Manual Task-Based Daily Operations (1.5 hours)</li>
+<li>Exception Management & Storage Mitigation (1.5 hours)</li>
+<li>GYB and Total Loss Processes (2 hours)</li>
+</ol>
+
+<strong>Phase 2: Shadowing & Mentoring (Week 2)</strong>
+<ul>
+<li>Shadow experienced staff</li>
+<li>Unit Leader reviews first 10 routing decisions</li>
+<li>Daily debrief sessions</li>
+</ul>
+
+<strong>Phase 3: Independent Operation (Weeks 3-4)</strong>
+<ul>
+<li>Handle claims independently</li>
+<li>Unit Leader spot-checks 25% of decisions</li>
+<li>End of week 4: Competency assessment</li>
+</ul>
+
+<h3>Success Indicators (90-Day Review)</h3>
+
+<div class="alert-success">
+<strong>Program is succeeding if:</strong>
+<ul style="margin:12px 0 0 20px;line-height:1.8">
+<li>Zero tow yard incidents above $1,500 for 30+ consecutive days</li>
+<li>Vehicle control rate consistently >90%</li>
+<li>Daily location task creation AND completion rate >98% by 10am</li>
+<li>GYB utilization >80% of repairable claims</li>
+<li>TL cycle time averaging <14 days (target: 12 days)</li>
+<li>Early TL tasks manually created for >90% of TL claims</li>
+<li>Customer-selected shops: Zero economic TL conversions after repair start</li>
+<li>Storage Mitigation: >90% at $0 storage within 48 hours</li>
+<li>Storage Mitigation: 80% resolved within 14 days</li>
+<li>Staff can execute protocols without supervisor guidance</li>
+</ul>
+</div>
+
+<div class="alert-info">
+<strong>For detailed role responsibilities, complete metrics dashboard, and customer communication scripts:</strong> Refer to original full documentation or contact claims leadership.
+</div>
+
+</div>
+
+</div>
+
+<script>
+function showSection(sectionId) {
+  // Hide all sections
+  var sections = document.querySelectorAll('.section');
+  for (var i = 0; i < sections.length; i++) {
+    sections[i].classList.remove('active');
+  }
+  
+  // Remove active from all tabs
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove('active');
+  }
+  
+  // Close all collapsible content (SOPs, Role Guides, etc.)
+  var allCollapsibleHeaders = document.querySelectorAll('.collapsible-header');
+  var allCollapsibleContent = document.querySelectorAll('.collapsible-content');
+  
+  for (var i = 0; i < allCollapsibleHeaders.length; i++) {
+    allCollapsibleHeaders[i].classList.remove('active');
+  }
+  for (var i = 0; i < allCollapsibleContent.length; i++) {
+    allCollapsibleContent[i].classList.remove('active');
+  }
+  
+  // Show selected section
+  document.getElementById(sectionId).classList.add('active');
+  
+  // Highlight active tab
+  event.target.classList.add('active');
+  
+  // Scroll to top
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function toggleCollapsible(id) {
+  var content = document.getElementById(id + '-content');
+  if (!content) {
+    console.error('Could not find content for:', id);
+    return;
+  }
+  
+  var header = content.previousElementSibling;
+  if (!header) {
+    console.error('Could not find header for:', id);
+    return;
+  }
+  
+  // Find the parent section
+  var parentSection = content.closest('.section');
+  
+  // Close all other collapsibles in the same section
+  if (parentSection) {
+    var allHeaders = parentSection.querySelectorAll('.collapsible-header');
+    var allContents = parentSection.querySelectorAll('.collapsible-content');
+    
+    for (var i = 0; i < allHeaders.length; i++) {
+      if (allHeaders[i] !== header) {
+        allHeaders[i].classList.remove('active');
+      }
+    }
+    for (var i = 0; i < allContents.length; i++) {
+      if (allContents[i] !== content) {
+        allContents[i].classList.remove('active');
+      }
+    }
+  }
+  
+  // Toggle the clicked collapsible
+  header.classList.toggle('active');
+  content.classList.toggle('active');
+  
+  // Scroll to header when opening
+  if (content.classList.contains('active')) {
+    setTimeout(function() {
+      header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function toggleRoleGuide(roleId) {
+  // Get the specific content for this role
+  var clickedContent = document.getElementById(roleId + '-content');
+  if (!clickedContent) {
+    console.error('Could not find content for role:', roleId);
+    return;
+  }
+  
+  var clickedHeader = clickedContent.previousElementSibling;
+  if (!clickedHeader) {
+    console.error('Could not find header for role:', roleId);
+    return;
+  }
+  
+  // Get all role guide contents
+  var allContents = document.querySelectorAll('#role-guides .collapsible-content');
+  var allHeaders = document.querySelectorAll('#role-guides .collapsible-header');
+  
+  // Close all other role guides
+  for (var i = 0; i < allContents.length; i++) {
+    if (allContents[i] !== clickedContent) {
+      allContents[i].classList.remove('active');
+    }
+  }
+  for (var i = 0; i < allHeaders.length; i++) {
+    if (allHeaders[i] !== clickedHeader) {
+      allHeaders[i].classList.remove('active');
+    }
+  }
+  
+  // Toggle the clicked role guide
+  clickedHeader.classList.toggle('active');
+  clickedContent.classList.toggle('active');
+  
+  // Scroll to header when opening
+  if (clickedContent.classList.contains('active')) {
+    setTimeout(function() {
+      clickedHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function scrollToSOP(sopId) {
+  var element = document.getElementById('sop-' + sopId);
+  if (element) {
+    setTimeout(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Auto-expand the SOP
+      var header = element.querySelector('.collapsible-header');
+      if (header && !header.classList.contains('active')) {
+        header.click();
+      }
+    }, 300);
+  }
+}
+</script>
+
+</body>
+</html>
